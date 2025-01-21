@@ -1,32 +1,14 @@
-import praw
-from sqlalchemy import create_engine, text
-import os
-from dotenv import load_dotenv
 import pandas as pd
+from functions.db_funcs import get_sql_connection, execute_sql_transaction
+from functions.reddit_api_funcs import get_subreddit, get_reddit_client
 
-NUMBER_OF_POSTS = 10
+# Set the number of posts and comments to fetch
+NUMBER_OF_POSTS = 5
 NUMBER_OF_COMMENTS = 10
+SUBREDDIT = "technology"
 
-load_dotenv()
-
-# DB Configuration
-host = os.getenv('DB_HOST')
-user = os.getenv('DB_USERNAME')
-password = os.getenv('DB_PASSWORD')
-port = os.getenv('DB_PORT')
-database = os.getenv('DB_DATABASE')
-dbschema = os.getenv('DB_NAME')
-
-# Reddit Configuration
-client_id = os.getenv('REDDIT_CLIENT_ID')
-client_secret = os.getenv('REDDIT_CLIENT_SECRET')
-user_agent = os.getenv('REDDIT_USER_AGENT')
-
-# Connect to the database
-connection_string = f"postgresql://{user}:{password}@{host}:{port}/{database}"
-engine = create_engine(connection_string)
-connection = engine.connect()
-
+# Get a DB connection engine
+engine = get_sql_connection()
 
 # Create the tables if they are not present
 create_posts_table_query = """
@@ -46,37 +28,28 @@ CREATE TABLE IF NOT EXISTS student.as_capstone_comments (
     post_id VARCHAR(10),
     body TEXT,
     score INT,
-    date_created TIMESTAMP
+    date_created TIMESTAMP,
+    FOREIGN KEY (post_id) REFERENCES student.as_capstone_posts(post_id)
 );
 """
 
-with engine.connect() as connection:
-    transaction = connection.begin()
-    try:
-        connection.execute(text(create_posts_table_query))
-        connection.execute(text(create_comments_table_query))
-        transaction.commit()
-    except:
-        transaction.rollback()
-        raise
-    
-# Initialize the Reddit API
-reddit = praw.Reddit(
-    client_id=client_id,
-    client_secret=client_secret,
-    user_agent=user_agent
-)
+execute_sql_transaction(create_comments_table_query, engine)
+execute_sql_transaction(create_posts_table_query, engine)
+
+# Get a Reddit API client
+reddit = get_reddit_client()
+subreddit = get_subreddit(SUBREDDIT)
 
 # Select the /r/technology subreddit
-subreddit = reddit.subreddit("technology")
+# subreddit = reddit.subreddit(SUBREDDIT)
             
 for post in subreddit.hot(limit=NUMBER_OF_POSTS):
-    post_id = post.id
-    title = post.title
-    date_created = pd.to_datetime(post.created_utc, unit='s')
-    score = post.score
-    comments = post.num_comments
-    url = post.url
+    # post_id = post.id
+    # title = post.title
+    # date_created = pd.to_datetime(post.created_utc, unit='s')
+    # score = post.score
+    # comments = post.num_comments
+    # url = post.url
     
     insert_post_query = """
     INSERT INTO student.as_capstone_posts (post_id, title, date_created, score, comments, url)
@@ -86,24 +59,18 @@ for post in subreddit.hot(limit=NUMBER_OF_POSTS):
         score = EXCLUDED.score, 
         comments = EXCLUDED.comments;
     """
-    data = {'post_id': post_id, 
-                'title': title, 
-                'date_created': date_created, 
-                'score': score, 
-                'comments': comments, 
-                'url': url}
+    data = {'post_id': post.id, 
+            'title': post.title, 
+            'date_created': pd.to_datetime(post.created_utc, unit='s'), 
+            'score': post.score, 
+            'comments': post.num_comments, 
+            'url': post.url
+            }
     
-    with engine.connect() as connection:
-        transaction = connection.begin()
-        try:
-            connection.execute(text(insert_post_query), data)
-            transaction.commit()
-        except:
-            transaction.rollback()
-            raise
+    execute_sql_transaction(insert_post_query, engine, data)
         
     # Extract comments
-    submission = reddit.submission(id=post_id)
+    submission = reddit.submission(id=post.id)
     submission.comment_sort = "top"
     submission.comments.replace_more(limit=0)
     for comment in submission.comments.list()[:NUMBER_OF_COMMENTS]:
@@ -117,20 +84,13 @@ for post in subreddit.hot(limit=NUMBER_OF_POSTS):
                     score = EXCLUDED.score; 
                 """
         data = {'comment_id': comment.id,
-                'post_id': post_id,
+                'post_id': post.id,
                 'body': comment.body,
                 'score': comment.score,
                 'date_created': pd.to_datetime(comment.created_utc, unit='s')
-            }
-                
-        with engine.connect() as connection:
-            transaction = connection.begin()
-            try:
-                connection.execute(text(insert_comments_query), data)
-                transaction.commit()
-            except:
-                transaction.rollback()
-                raise
+                }
+        
+        execute_sql_transaction(insert_comments_query, engine, data)
     
     delete_comments_query = """
             DELETE FROM student.as_capstone_comments
@@ -141,14 +101,8 @@ for post in subreddit.hot(limit=NUMBER_OF_POSTS):
                 LIMIT :number_of_comments
             )
         """
-    data = {'post_id': post_id,
+    data = {'post_id': post.id,
             'number_of_comments': NUMBER_OF_COMMENTS}
-    with engine.connect() as connection:
-            transaction = connection.begin()
-            try:
-                connection.execute(text(delete_comments_query), data)
-                transaction.commit()
-            except:
-                transaction.rollback()
-                raise
+    
+    execute_sql_transaction(delete_comments_query, engine, data)
     
