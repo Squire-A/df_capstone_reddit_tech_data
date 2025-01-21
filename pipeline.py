@@ -1,10 +1,10 @@
 import pandas as pd
-from functions.db_funcs import get_sql_connection, execute_sql_transaction
-from functions.reddit_api_funcs import get_subreddit, get_reddit_client
+from utils.db_utils import get_sql_connection, execute_sql_transaction
+from utils.reddit_api_utils import get_reddit_subreddit
 
 # Set the number of posts and comments to fetch
-NUMBER_OF_POSTS = 5
-NUMBER_OF_COMMENTS = 10
+NUMBER_OF_POSTS = 2
+NUMBER_OF_COMMENTS = 5
 SUBREDDIT = "technology"
 
 # Get a DB connection engine
@@ -37,8 +37,7 @@ execute_sql_transaction(create_comments_table_query, engine)
 execute_sql_transaction(create_posts_table_query, engine)
 
 # Get a Reddit API client
-reddit = get_reddit_client()
-subreddit = get_subreddit(SUBREDDIT)
+reddit, subreddit = get_reddit_subreddit(SUBREDDIT)
 
 # Select the /r/technology subreddit
 # subreddit = reddit.subreddit(SUBREDDIT)
