@@ -53,6 +53,7 @@ def main():
             
             # Retrieve query to insert comment to the database
             insert_comments_query = get_sql_query('insert_comments.sql')
+            
             # Compile a dictionary of the data to be inserted
             data = {'comment_id': comment.id,
                     'post_id': post.id,
@@ -65,11 +66,14 @@ def main():
         
         # Retrieve query to delete excess comments from the database
         delete_excess_comments_query = get_sql_query('delete_excess_comments.sql')
+        
         # Compile a dictionary of the data to be deleted
         data = {'post_id': post.id,
                 'number_of_comments': NUMBER_OF_COMMENTS}
+        
         # Execute the query to delete any excess comments
         execute_sql_transaction(delete_excess_comments_query, engine, data)
+        
     print("Posts and comments written to the database successfully.")
     print("Pipeline execution complete.")
     
