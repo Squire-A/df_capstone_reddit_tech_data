@@ -114,7 +114,7 @@ graph TD
 ```
 
 ## Data Collection Script Execution
-To run the data extraction, please ensure the required libraries are installed from the requirements.txt file
+To run the data extraction, please ensure the required libraries are installed from the requirements.txt file.
 A .env file will also be required in the main project directory with the following:
 
 ```plaintext
