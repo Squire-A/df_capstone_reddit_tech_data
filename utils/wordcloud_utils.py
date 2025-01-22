@@ -1,0 +1,33 @@
+import re
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+import nltk
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+
+nltk.download('stopwords')
+nltk.download('punkt_tab')
+
+def clean_text(text):
+    stop_words = set(stopwords.words("english"))
+    
+    # Remove URLs and special characters
+    text = re.sub(r"http\S+|www\S+|https\S+", "", text, flags=re.MULTILINE)
+    # text = re.sub(r"[^\w\s]", "", text)
+    
+    # Convert to lowercase and remove stopwords
+    words = word_tokenize(text.lower())
+    words = [w for w in words if w not in stop_words]
+    return " ".join(words)
+
+def generate_wordcloud(text):
+    final_text = clean_text(text)
+    wordcloud = WordCloud(max_words=100).generate(final_text)
+    fig, ax = plt.subplots()
+    ax.imshow(wordcloud, interpolation='bilinear')
+    ax.axis("off")
+    return fig
+
+## Extraction script instructions
+
+## CRON Details
