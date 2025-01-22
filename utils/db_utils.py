@@ -14,8 +14,10 @@ def get_sql_connection():
     port = os.getenv('DB_PORT')
     database = os.getenv('DB_DATABASE')
     
-    if not all([host, user, password, port, database]):
+    if not all([host, user, port, database]):
         raise ValueError("One or more database environment variables are missing.")
+    if not password:
+        print("Warning: No password found for the database connection. This may or may not be a problem!")
     
     connection_string = f"postgresql://{user}:{password}@{host}:{port}/{database}"
     
