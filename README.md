@@ -113,8 +113,13 @@ graph TD
     J --> K
 ```
 
-## Data Collection Script Execution
-To run the data extraction, please ensure the required libraries are installed from the requirements.txt file.
+## Extraction Script Instructions
+To run the data extraction, please ensure the required libraries are installed from the requirements.txt file by running a pip install:
+
+```bash
+pip install -r requirements.txt
+```
+
 A .env file will also be required in the main project directory with the following:
 
 ```plaintext
@@ -131,4 +136,10 @@ REDDIT_CLIENT_ID='reddit_app_id'
 REDDIT_CLIENT_SECRET='reddit_client_secret'
 REDDIT_USER_AGENT='appropriate_user_agent'
 ```
-Once these are in place you can then run the pipeline.py file to extract the data and load it into the database.
+Once these are in place you can use python to run the pipeline.py file to extract the data and load it into the database.
+```bash
+python3 pipeline.py
+```
+## Chron Details
+The script can take a couple minutes to run.
+It should be run every 120 minutes
