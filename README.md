@@ -114,13 +114,34 @@ graph TD
 ```
 
 ## Extraction Script Instructions
-To run the data extraction, please ensure the required libraries are installed from the requirements.txt file by running a pip install:
+To run the data extraction use either your native python environment or create and activate a virtual environment.
+
+To creat a virtual environment use the following command in your command prompt:
+```bash
+python3 -m venv .venv
+```
+Then depending on your operating system, activate the virtual environment with one of the following:
+
+Mac/Linux:
+```bash
+source .venv/bin/activate
+```
+Windows (Command Prompt):
+```cmd
+.venv\scripts\activate
+```
+Windows (Powershell):
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+ Next, ensure the required libraries are installed from the requirements.txt file by running a pip install:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-A .env file will also be required in the main project directory with the following:
+A .env file will also be required in the main project directory with the following contents:
 
 ```plaintext
 # Database Configuration
@@ -142,4 +163,4 @@ python3 pipeline.py
 ```
 ## Chron Details
 The script can take a couple minutes to run.
-It should be run every 120 minutes
+It should be run every 120 minutes.
