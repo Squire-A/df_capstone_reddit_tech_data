@@ -39,3 +39,4 @@ def execute_sql_transaction(query, engine, data=None):
             print(f"An error occurred executing the query: {e}")
             transaction.rollback()
             raise e
+        

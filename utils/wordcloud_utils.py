@@ -13,21 +13,19 @@ def clean_text(text):
     
     # Remove URLs and special characters
     text = re.sub(r"http\S+|www\S+|https\S+", "", text, flags=re.MULTILINE)
-    # text = re.sub(r"[^\w\s]", "", text)
+    text = re.sub(r"[^\w\s]", "", text)
     
     # Convert to lowercase and remove stopwords
     words = word_tokenize(text.lower())
     words = [w for w in words if w not in stop_words]
     return " ".join(words)
 
-def generate_wordcloud(text):
+def generate_wordcloud(df, column):
+    text = ' '.join(text for text in df[column].str.strip())
     final_text = clean_text(text)
-    wordcloud = WordCloud(max_words=100).generate(final_text)
+    wordcloud = WordCloud(max_words=50, background_color='white').generate(final_text)
+    wordcloud_words = wordcloud.words_
     fig, ax = plt.subplots()
     ax.imshow(wordcloud, interpolation='bilinear')
     ax.axis("off")
-    return fig
-
-## Extraction script instructions
-
-## CRON Details
+    return (fig, wordcloud_words)
