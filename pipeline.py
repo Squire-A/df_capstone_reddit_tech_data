@@ -1,7 +1,5 @@
-import pandas as pd
-from utils.db_utils import get_sql_connection, execute_sql_transaction
+from utils.db_utils import get_sql_connection
 from utils.reddit_api_utils import get_reddit_subreddit
-from utils.sql_utils import get_sql_query
 from utils.pipeline_utils import create_tables, extraction_process
 
 # Set the number of posts ,comments to fetch and subreddit to get them from
