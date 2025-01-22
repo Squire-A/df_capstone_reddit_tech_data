@@ -23,7 +23,7 @@ def clean_text(text):
 def generate_wordcloud(df, column, no_of_words=100):
     text = ' '.join(text for text in df[column].str.strip())
     final_text = clean_text(text)
-    wordcloud = WordCloud(max_words=no_of_words, background_color='white').generate(final_text)
+    wordcloud = WordCloud(max_words=no_of_words, height=300, background_color='white').generate(final_text)
     wordcloud_words = wordcloud.words_
     fig, ax = plt.subplots()
     ax.imshow(wordcloud, interpolation='bilinear')

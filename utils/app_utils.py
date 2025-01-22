@@ -21,3 +21,11 @@ def get_comments_df_from_post(engine, post_id):
     params = {"post_id": post_id}
     df = get_df_database(query, engine, params)
     return df
+
+def get_top_10_words(words_dict):
+    top_10_words = list(words_dict.keys())[:10]
+    df = pd.DataFrame(top_10_words, columns=['Word'])
+    df['Rank'] = df.index + 1
+    df = df[['Rank', 'Word']]
+    df = df.set_index('Rank')
+    return df
