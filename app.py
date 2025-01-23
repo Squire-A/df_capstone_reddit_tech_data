@@ -25,8 +25,28 @@ with st.sidebar:
     with col1:
         start_date = st.date_input('Start Date', value='today', min_value=MIN_DATE, max_value=MAX_DATE, key=1)
     with col2:
+        # Get the end date and set the max value to 7 days from the start date or today's date, whichever is earlier
         end_date_max = min(datetime.date.today(), start_date + datetime.timedelta(days=7))
         end_date = st.date_input('End Date', value='today', min_value=start_date, max_value=end_date_max, key=2)
+        
+    st.markdown('---')
+    st.markdown('''
+                ## About
+                This app analyses the hot posts from the /r/technology subreddit.
+                The data is collected from the Reddit API and stored in a postgreSQL database.
+                The extraction script can be seen in the [github repository](https://github.com/Squire-A/df_capstone_reddit_tech_data).
+                If you enter a date range, the database is queried and analysis performed on all the posts and comments in that date range on the database. 
+                At this time the earliest data available is from 21st January 2025 and the maximum timeframe is 7 days. The extraction script is usually ran every 2 hours and checks the top 10 hot posts and 100 comments on each post from the /r/technology subreddit.
+                
+                __Please be aware that the words presented are not censored and may contain offensive language.__
+                
+                If you'd like to connect with me, please reach out on [LinkedIn](https://www.linkedin.com/in/anthony-squire-54508aa0/)!
+                I'm always open to feedback and suggestions and I'm very eager to learn.
+                
+                Thanks for checking out the app!
+                
+                Anthony Squire
+            ''')
 
 # Create the tabs for the different analysis sections
 posts, comments, day_to_day = st.tabs(['Post Titles', 'Comments', 'Day to Day Comparison'])
@@ -46,12 +66,14 @@ with posts:
     with left:
         st.subheader('Sentiment Analysis of Titles')
         st.caption('A breakdown of the sentiment of the hot posts titles')
+        # Retrieve and display the sentiment analysis of the posts
         sentiment_fig = get_sentiment_pie_chart(posts_df, 'title')
         st.plotly_chart(sentiment_fig)
 
     with right:
         st.subheader('Top 10 Words in Post Titles')
         st.caption('The most common words seen in the post titles')
+        # Retrieve and display the top 10 words from the posts
         df = get_top_10_words(posts_words)
         st.dataframe(df)
     
@@ -59,11 +81,11 @@ with comments:
     
     selection_string = 'Select a post to view the comments analysis. The posts are ordered by their score, with the highest score at the top'
     post_selection = st.selectbox(selection_string, posts_df['title'])
-    
+    # Get the post_id for the selected post
     post_id = posts_df.loc[posts_df['title'] == post_selection, 'post_id'].values[0]
-
+    # Get the comments for the selected post
     comments_df = get_comments_df_from_post(engine, post_id)
-
+    # Generate the wordcloud and top 10 words for the comments
     comments_wordcloud, comments_words = generate_wordcloud(comments_df, 'body')
 
     st.pyplot(comments_wordcloud, use_container_width=False)
@@ -73,6 +95,7 @@ with comments:
     with left:
         st.subheader('Sentiment Analysis of Comments')
         st.caption('A breakdown of the sentiment of the top 100 comments')
+        # Retrieve and display the sentiment analysis of the comments
         sentiment_fig = get_sentiment_pie_chart(comments_df, 'body')
         st.plotly_chart(sentiment_fig)
         

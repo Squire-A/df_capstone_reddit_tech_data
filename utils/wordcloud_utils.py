@@ -21,11 +21,17 @@ def clean_text(text):
     return " ".join(words)
 
 def generate_wordcloud(df, column, no_of_words=100, figure=True):
+    # Combine all the text in the column
     text = ' '.join(text for text in df[column].str.strip())
+    # Clean the text
     final_text = clean_text(text)
+    # Generate the wordcloud
     wordcloud = WordCloud(max_words=no_of_words, width=600, height=200, background_color='white').generate(final_text)
+    # Get the words and their frequencies
     wordcloud_words = wordcloud.words_
+    # Produce the wordcloud figure
     fig, ax = plt.subplots()
     ax.imshow(wordcloud, interpolation='bilinear')
     ax.axis("off")
+    # Return the fig and words or just the words dictionary if figure is set to false
     return (fig, wordcloud_words) if figure else wordcloud_words
