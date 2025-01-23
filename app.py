@@ -16,9 +16,9 @@ engine = get_sql_connection()
 st.header('/r/technology Hot Posts Analysis')
 
 with st.sidebar:
-    
+    # Get the timeframe for analysis from the user
     st.header('Date Selection')
-    st.write('Select a date range from which to analyse the hot /r/technology posts')
+    st.write('Select a date range from which to analyse the hot /r/technology posts and comments')
     
     col1, col2 = st.columns(2)
 
@@ -28,27 +28,30 @@ with st.sidebar:
         end_date_max = min(datetime.date.today(), start_date + datetime.timedelta(days=7))
         end_date = st.date_input('End Date', value='today', min_value=start_date, max_value=end_date_max, key=2)
 
-
-    
+# Create the tabs for the different analysis sections
 posts, comments, day_to_day = st.tabs(['Post Titles', 'Comments', 'Day to Day Comparison'])
 
 with posts:
-    
+    # Get the posts for the selected date range
     posts_df = get_posts_df_on_date(engine, start_date, end_date)
+    # Generate the wordcloud and top 10 words for the post titles
     posts_wordcloud, posts_words = generate_wordcloud(posts_df, 'title')
     st.subheader('Most Common Words in Post Titles')
+    # Display the wordcloud and caption
     st.pyplot(posts_wordcloud, use_container_width=False)
-    st.caption(f"Top 100 words wordcloud from post titles created between {start_date} and {end_date}")
+    st.caption(f"Top 100 words in post titles created between {start_date} and {end_date}")
     
     left, right = st.columns(2)
     
     with left:
         st.subheader('Sentiment Analysis of Titles')
+        st.caption('A breakdown of the sentiment of the hot posts titles')
         sentiment_fig = get_sentiment_pie_chart(posts_df, 'title')
         st.plotly_chart(sentiment_fig)
 
     with right:
         st.subheader('Top 10 Words in Post Titles')
+        st.caption('The most common words seen in the post titles')
         df = get_top_10_words(posts_words)
         st.dataframe(df)
     
@@ -64,17 +67,19 @@ with comments:
     comments_wordcloud, comments_words = generate_wordcloud(comments_df, 'body')
 
     st.pyplot(comments_wordcloud, use_container_width=False)
-    
+    st.caption(f"Top 100 words in the top 100 top level comments of the selected post: {post_selection}")
     left, right = st.columns(2)
     
     with left:
         st.subheader('Sentiment Analysis of Comments')
+        st.caption('A breakdown of the sentiment of the top 100 comments')
         sentiment_fig = get_sentiment_pie_chart(comments_df, 'body')
         st.plotly_chart(sentiment_fig)
         
     with right:
         st.subheader('Top 10 words from comments')
-        st.caption('Top 10 words seen in the top comments of the selected post')
+        st.caption('The most common words seen in the top 100 comments')
+        # Retrieve and display the top 10 words from the comments
         df = get_top_10_words(comments_words)
         st.dataframe(df)
 
