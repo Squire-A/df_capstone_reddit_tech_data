@@ -21,7 +21,7 @@
 Build a pipeline that regularly collects data from the /r/technology subreddit and stores it in a postgreSQL database. Then conduct analysis on the data and generate some visualisations. Finally, produce a streamlit app to showcase the data and visualisations along with any insights.
 
 ### Aims
-Through this project I aim to uncover trends and insights from the /r/technology subreddit through analysis of the most discussed topics and the corresponding responses and sentiments of the commenters. By visualising the data with tools such as word clouds I hope to identify recurring themes, emerging technologies and areas of interest within the /r/technology community on any given day, then by keeping the data in a postgreSQL database, see how this might change over time. Ultimately I want to utilise the knowledge I have gained while in the Digital Futures academy and use this project to improve and showcase my data engineering skills.
+Through this project I aim to uncover trends and insights from the /r/technology subreddit through analysis of the most discussed topics and the corresponding responses and sentiments of the commenters. By visualising the data with tools such as word clouds I hope to identify recurring themes, emerging technologies and areas of interest within the /r/technology community and gauge the sentiment of the content and comments on any given day. Then by keeping the data in a postgreSQL database, see how this might change over time. Ultimately I want to utilise the knowledge I have gained while in the Digital Futures academy and use this project to improve and showcase my data engineering skills.
 
 ### Project Plan Overview
 - Utilise the reddit API to get the top 10 hot posts in the r/technology subreddit
@@ -33,7 +33,7 @@ Through this project I aim to uncover trends and insights from the /r/technology
   - datetime published
   - score
   - number of comments
-- Store the top 200 comments data in a comments table recording the following:
+- Store the top 100 comments data in a comments table recording the following:
   -  comment id
   -  post id
   -  body
@@ -57,6 +57,7 @@ Through this project I aim to uncover trends and insights from the /r/technology
   - Produce visualisations
   - Design and create a streamlit app to showcase the collected data
 - Day 4:
+  - Complete streamlit app
   - Create a presentation of the project
 - Day 5:
   - Deliver presentation and demo
@@ -94,15 +95,15 @@ graph TD
     F@{shape: diamond, label: "Check Comments Table" }
     G@{shape: subproc, label: "Insert Comment into Comments Table"}
     H@{shape: subproc, label: "Update Comment in Comments Table"}
-    I@{shape: hex, label: "Rank and Delete Comments where Rank > 200"}
+    I@{shape: hex, label: "Rank and Delete Comments where Rank > 100"}
     J@{shape: subproc, label: "Commit Changes to Database"}
     K@{shape: dbl-circ, label: "End Script"}
 
     A --> B
-    B --> |"Extract Post Details"| C
+    B --> |"Extract Hot Post Details"| C
     C --> |"New Post"| D
     C --> |"Existing Post"| E
-    B --> |"Extract top 200 comments"| F
+    B --> |"Extract top 100 comments"| F
     F --> |"New Comment"| G
     F --> |"Existing Comment"| H
     G --> I
