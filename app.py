@@ -50,106 +50,122 @@ with st.sidebar:
 
 # Create the tabs for the different analysis sections
 posts, comments, day_to_day = st.tabs(['Post Titles', 'Comments', 'Day to Day Comparison'])
+# Get the posts for the selected date range
+posts_df = get_posts_df_on_date(engine, start_date, end_date)
 
-with posts:
-    # Get the posts for the selected date range
-    posts_df = get_posts_df_on_date(engine, start_date, end_date)
-    # Generate the wordcloud and top 10 words for the post titles
-    posts_wordcloud, posts_words = generate_wordcloud(posts_df, 'title')
-    st.subheader('Most Common Words in Post Titles')
-    # Display the wordcloud and caption
-    st.pyplot(posts_wordcloud, use_container_width=False)
-    st.caption(f"Top 100 words in post titles created between {start_date} and {end_date}")
+# Check if there are any posts before conducting analysis
+if not posts_df.empty:
     
-    left, right = st.columns(2)
-    
-    with left:
-        st.subheader('Sentiment Analysis of Titles')
-        st.caption('A breakdown of the sentiment of the hot posts titles')
-        # Retrieve and display the sentiment analysis of the posts
-        sentiment_fig = get_sentiment_pie_chart(posts_df, 'title')
-        st.plotly_chart(sentiment_fig)
+    with posts:
+        # Generate the wordcloud and top 10 words for the post titles
+        posts_wordcloud, posts_words = generate_wordcloud(posts_df, 'title')
+        st.subheader('Most Common Words in Post Titles')
+        # Display the wordcloud and caption
+        st.pyplot(posts_wordcloud, use_container_width=False)
+        st.caption(f"Top 100 words in post titles created between {start_date} and {end_date}")
+        
+        left, right = st.columns(2)
+        
+        with left:
+            st.subheader('Sentiment Analysis of Titles')
+            st.caption('A breakdown of the sentiment of the hot posts titles')
+            # Retrieve and display the sentiment analysis of the posts
+            sentiment_fig = get_sentiment_pie_chart(posts_df, 'title')
+            st.plotly_chart(sentiment_fig)
 
-    with right:
-        st.subheader('Top 10 Words in Post Titles')
-        st.caption('The most common words seen in the post titles')
-        # Retrieve and display the top 10 words from the posts
-        df = get_top_10_words(posts_words)
-        st.dataframe(df)
-    
-with comments:
-    
-    selection_string = 'Select a post to view the comments analysis. The posts are ordered by their score, with the highest score at the top'
-    post_selection = st.selectbox(selection_string, posts_df['title'])
-    # Get the post_id for the selected post
-    post_id = posts_df.loc[posts_df['title'] == post_selection, 'post_id'].values[0]
-    # Get the comments for the selected post
-    comments_df = get_comments_df_from_post(engine, post_id)
-    # Generate the wordcloud and top 10 words for the comments
-    comments_wordcloud, comments_words = generate_wordcloud(comments_df, 'body')
+        with right:
+            st.subheader('Top 10 Words in Post Titles')
+            st.caption('The most common words seen in the post titles')
+            # Retrieve and display the top 10 words from the posts
+            df = get_top_10_words(posts_words)
+            st.dataframe(df)
 
-    st.pyplot(comments_wordcloud, use_container_width=False)
-    st.caption(f"Top 100 words in the top 100 top level comments of the selected post: {post_selection}")
-    left, right = st.columns(2)
-    
-    with left:
-        st.subheader('Sentiment Analysis of Comments')
-        st.caption('A breakdown of the sentiment of the top 100 comments')
-        # Retrieve and display the sentiment analysis of the comments
-        sentiment_fig = get_sentiment_pie_chart(comments_df, 'body')
-        st.plotly_chart(sentiment_fig)
         
-    with right:
-        st.subheader('Top 10 words from comments')
-        st.caption('The most common words seen in the top 100 comments')
-        # Retrieve and display the top 10 words from the comments
-        df = get_top_10_words(comments_words)
-        st.dataframe(df)
+    with comments:
+        
+        selection_string = 'Select a post to view the comments analysis. The posts are ordered by their score, with the highest score at the top'
+        post_selection = st.selectbox(selection_string, posts_df['title'])
+        # Get the post_id for the selected post
+        post_id = posts_df.loc[posts_df['title'] == post_selection, 'post_id'].values[0]
+        # Get the comments for the selected post
+        comments_df = get_comments_df_from_post(engine, post_id)
+        # Generate the wordcloud and top 10 words for the comments
+        comments_wordcloud, comments_words = generate_wordcloud(comments_df, 'body')
 
-with day_to_day:
-    
-    words, sentiment = st.tabs(['Trending Words', 'Sentiment Analysis'])
-    
-    # Get all dates in the chosen date range
-    date_range = pd.date_range(start_date, end_date)
-    
-        # Initialise the dataframes for the top 10 words and sentiment analysis
-    day_to_day_top_10 = pd.DataFrame({'Rank': range(1, 11)})
-    day_to_day_posts_sentiments = pd.DataFrame({'Sentiment': ['Positive', 'Neutral', 'Negative']})
-    day_to_day_comments_sentiments = pd.DataFrame({'Sentiment': ['Positive', 'Neutral', 'Negative']})
-    day_to_day_top_10_posts = day_to_day_top_10.set_index('Rank')
-    day_to_day_top_10_comments = day_to_day_top_10.set_index('Rank')
-    
-    for date in date_range:
-        date = date.date()
-        # Get the posts and comments for the day
-        day_posts = get_posts_df_on_date(engine, date, date)
-        day_comments = get_posts_df_on_date(engine, date, date, comments=True)
+        st.pyplot(comments_wordcloud, use_container_width=False)
+        st.caption(f"Top 100 words in the top 100 top level comments of the selected post: {post_selection}")
+        left, right = st.columns(2)
         
-        # Append the top 10 words to the dataframe
-        day_to_day_top_10_posts[date] = append_day(date, engine)
-        day_to_day_top_10_comments[date] = append_day(date, engine, comments=True)
+        with left:
+            st.subheader('Sentiment Analysis of Comments')
+            st.caption('A breakdown of the sentiment of the top 100 comments')
+            # Retrieve and display the sentiment analysis of the comments
+            sentiment_fig = get_sentiment_pie_chart(comments_df, 'body')
+            st.plotly_chart(sentiment_fig)
+            
+        with right:
+            st.subheader('Top 10 words from comments')
+            st.caption('The most common words seen in the top 100 comments')
+            # Retrieve and display the top 10 words from the comments
+            df = get_top_10_words(comments_words)
+            st.dataframe(df)
+
+    with day_to_day:
+        # Get all dates in the chosen date range
+        date_range = pd.date_range(start_date, end_date)
         
-        # Sentiment analysis of posts and comments
-        day_post_sentiments = get_sentiment(day_posts, 'title')
-        day_comment_sentiments = get_sentiment(day_comments, 'body')
+            # Initialise the dataframes for the top 10 words and sentiment analysis
+        day_to_day_top_10 = pd.DataFrame({'Rank': range(1, 11)})
+        day_to_day_posts_sentiments = pd.DataFrame({'Sentiment': ['Positive', 'Neutral', 'Negative']})
+        day_to_day_comments_sentiments = pd.DataFrame({'Sentiment': ['Positive', 'Neutral', 'Negative']})
+        day_to_day_top_10_posts = day_to_day_top_10.set_index('Rank')
+        day_to_day_top_10_comments = day_to_day_top_10.set_index('Rank')
         
-        # Get the sentiment counts
-        day_post_sentiment_counts = get_sentiment_counts(day_post_sentiments)
-        day_comment_sentiment_counts = get_sentiment_counts(day_comment_sentiments)
-        
-        # Add the sentiment counts to the dataframes
-        day_to_day_posts_sentiments[date] = day_post_sentiment_counts['Count']
-        day_to_day_comments_sentiments[date] = day_comment_sentiment_counts['Count']
-    
-    with words:
-        # Display the top 10 words dataframes
-        st.subheader('Top 10 Words in Post Titles')
-        st.dataframe(day_to_day_top_10_posts)
-        st.subheader('Top 10 Words in Comments')
-        st.dataframe(day_to_day_top_10_comments)
-    with sentiment:
-        # Display sentiment daily comparison charts
-        # st.subheader('Sentiment Analysis of Posts and Comments')
-        st.plotly_chart(get_sentiment_daily_comparison_chart(day_to_day_posts_sentiments, 'Sentiment Breakdown of Post Titles by Day'))
-        st.plotly_chart(get_sentiment_daily_comparison_chart(day_to_day_comments_sentiments, 'Sentiment Breakdown of Comments by Day'))
+        for date in date_range:
+            date = date.date()
+            # Get the posts and comments for the day
+            day_posts = get_posts_df_on_date(engine, date, date)
+            day_comments = get_posts_df_on_date(engine, date, date, comments=True)
+            
+            if not day_posts.empty:
+                # Append the top 10 words to the dataframe
+                day_to_day_top_10_posts[date] = append_day(date, engine)
+                day_to_day_top_10_comments[date] = append_day(date, engine, comments=True)
+                
+                # Sentiment analysis of posts and comments
+                day_post_sentiments = get_sentiment(day_posts, 'title')
+                day_comment_sentiments = get_sentiment(day_comments, 'body')
+                
+                # Get the sentiment counts
+                day_post_sentiment_counts = get_sentiment_counts(day_post_sentiments)
+                day_comment_sentiment_counts = get_sentiment_counts(day_comment_sentiments)
+                
+                # Add the sentiment counts to the dataframes
+                day_to_day_posts_sentiments[date] = day_post_sentiment_counts['Count']
+                day_to_day_comments_sentiments[date] = day_comment_sentiment_counts['Count']
+            else:
+                # If there are no posts for the current date place None in the dataframes so that the day still appears in the visualisations
+                blank_day = True
+                day_to_day_top_10_posts[date] = None
+                day_to_day_top_10_comments[date] = None
+                day_to_day_posts_sentiments[date] = None
+                day_to_day_comments_sentiments[date] = None
+                
+        if blank_day:
+            st.warning('At least one date in the selected range has no hot posts')
+            
+        words, sentiment = st.tabs(['Trending Words', 'Sentiment Analysis'])
+        with words:
+            # Display the top 10 words dataframes
+            st.subheader('Top 10 Words in Post Titles')
+            st.dataframe(day_to_day_top_10_posts)
+            st.subheader('Top 10 Words in Comments')
+            st.dataframe(day_to_day_top_10_comments)
+        with sentiment:
+            # Display sentiment daily comparison charts
+            # st.subheader('Sentiment Analysis of Posts and Comments')
+            st.plotly_chart(get_sentiment_daily_comparison_chart(day_to_day_posts_sentiments, 'Sentiment Breakdown of Post Titles by Day'))
+            st.plotly_chart(get_sentiment_daily_comparison_chart(day_to_day_comments_sentiments, 'Sentiment Breakdown of Comments by Day'))
+else:
+
+    st.error('There are not yet any hot posts in the selected date range')
