@@ -70,16 +70,20 @@ def delete_excess_comments(post_id, no_of_comments, engine):
     
     
 def extraction_process(reddit, subreddit, engine, no_of_posts, no_of_comments):
-    # Iterate through the desired number of hot posts
-    for post in subreddit.hot(limit=no_of_posts):
-        # Extract and load the post data
-        extract_load_post(post, engine)
-        
-        # Extract comments from the post
-        comments = extract_comments(reddit, post.id, no_of_comments)
-        
-        # Load the comments to the database
-        load_comments(comments, post.id, engine)
-        
-        # Delete any excess comments
-        delete_excess_comments(post.id, no_of_comments, engine)
+    try:
+        # Iterate through the desired number of hot posts
+        for post in subreddit.hot(limit=no_of_posts):
+            # Extract and load the post data
+            extract_load_post(post, engine)
+            
+            # Extract comments from the post
+            comments = extract_comments(reddit, post.id, no_of_comments)
+            
+            # Load the comments to the database
+            load_comments(comments, post.id, engine)
+            
+            # Delete any excess comments
+            delete_excess_comments(post.id, no_of_comments, engine)
+    except Exception as e:
+        print(f'There was an error during extraction and loading to the database {e}')
+        raise e
