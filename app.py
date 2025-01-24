@@ -110,11 +110,14 @@ if not posts_df.empty:
             df = get_top_10_words(comments_words)
             st.dataframe(df)
 
+    # Initialise variable to determine if any date has no data
+    blank_day = False
+
     with day_to_day:
         # Get all dates in the chosen date range
         date_range = pd.date_range(start_date, end_date)
         
-            # Initialise the dataframes for the top 10 words and sentiment analysis
+        # Initialise the dataframes for the top 10 words and sentiment analysis
         day_to_day_top_10 = pd.DataFrame({'Rank': range(1, 11)})
         day_to_day_posts_sentiments = pd.DataFrame({'Sentiment': ['Positive', 'Neutral', 'Negative']})
         day_to_day_comments_sentiments = pd.DataFrame({'Sentiment': ['Positive', 'Neutral', 'Negative']})
@@ -144,8 +147,9 @@ if not posts_df.empty:
                 day_to_day_posts_sentiments[date] = day_post_sentiment_counts['Count']
                 day_to_day_comments_sentiments[date] = day_comment_sentiment_counts['Count']
             else:
-                # If there are no posts for the current date place None in the dataframes so that the day still appears in the visualisations
+                # Set blank_day to True as there is at lest one day with no post data
                 blank_day = True
+                # If there are no posts for the current date place None in the dataframes so that the day still appears in the visualisations
                 day_to_day_top_10_posts[date] = None
                 day_to_day_top_10_comments[date] = None
                 day_to_day_posts_sentiments[date] = None
@@ -166,6 +170,7 @@ if not posts_df.empty:
             # st.subheader('Sentiment Analysis of Posts and Comments')
             st.plotly_chart(get_sentiment_daily_comparison_chart(day_to_day_posts_sentiments, 'Sentiment Breakdown of Post Titles by Day'))
             st.plotly_chart(get_sentiment_daily_comparison_chart(day_to_day_comments_sentiments, 'Sentiment Breakdown of Comments by Day'))
-else:
 
+else:
+    # Present an error message when there is no data to display
     st.error('There are not yet any hot posts in the selected date range')
