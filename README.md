@@ -3,6 +3,10 @@
 # Reddit /r/technology Data Pipeline and Analysis
 ## Anthony Squire - DF Capstone Project
 
+### Introduction
+
+This project serves as the capstone for my training with Digital Futures, bringing together the skills and knowledge I have developed in the data engineering academy. The goal of this project is to collect and analyze daily data from the r/technology subreddit, providing insights into trending discussions, emerging technologies, and shifts in public interest.
+
 ### Project Requirements
 1. Choose a website, API or RSS feed. It must be something that updates frequently
 2. Create a script or process that obtains the data. (This script will eventually be run periodically)
