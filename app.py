@@ -27,7 +27,7 @@ with st.sidebar:
     with col2:
         # Get the end date and set the max value to 7 days from the start date or today's date, whichever is earlier
         end_date_max = min(datetime.date.today(), start_date + datetime.timedelta(days=7))
-        end_date = st.date_input('End Date', value='today', min_value=start_date, max_value=end_date_max, key=2)
+        end_date = st.date_input('End Date', value='today', min_value=start_date, max_value='today', key=2)
         
     st.markdown('---')
     st.markdown('''
